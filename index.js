@@ -379,17 +379,17 @@ async function setupReviewsChannel() {
         .addFields(
             { 
                 name: '📋 Como funciona', 
-                value: '```\n• Clique no botão "Avaliar equipe"\n• Selecione o membro que deseja avaliar\n• Escolha uma nota de 0 a 10\n• Escreva seu feedback (opcional)\n5️⃣ Envie sua avaliação\n```', 
+                value: '```\n• Clique no botão "Avaliar equipe"\n• Selecione o membro que deseja avaliar\n• Escolha uma nota de 0 a 10\n• Escreva seu feedback (opcional)\n• Envie sua avaliação\n```', 
                 inline: false 
             },
             { 
                 name: '🎯 Quem pode avaliar', 
-                value: '✅ **Todos os membros** que não são da staff podem avaliar', 
+                value: '✅ **Todos os membros** podem avaliar', 
                 inline: true 
             },
             { 
                 name: '⭐ Quem é avaliado', 
-                value: `👥 **${staffMembers.length} membros** da staff disponíveis`, 
+                value: `👥 **${staffMembers.length} membros** da administração`, 
                 inline: true 
             },
             { 
