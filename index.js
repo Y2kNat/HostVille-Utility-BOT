@@ -959,12 +959,11 @@ client.on('interactionCreate', async interaction => {
         .setColor(color)
         .setThumbnail(reviewed.user.displayAvatarURL({ dynamic: true }))
         .addFields(
-            { name: '👤 Avaliador', value: `${reviewer.tag} (${reviewer.id})`, inline: true },
-            { name: '⭐ Avaliado', value: `${reviewed.user.tag} (${reviewed.id})`, inline: true },
+            { name: '👤 Avaliador', value: `${reviewer.tag}`, inline: true },
+            { name: '⭐ Avaliado', value: `${reviewed.user.tag}`, inline: true },
             { name: '🎯 Nota', value: `${score}/10`, inline: true },
             { name: '💬 Feedback', value: feedback.length > 1024 ? feedback.substring(0, 1021) + '...' : feedback, inline: false }
         )
-        .setFooter({ text: `ID da avaliação: ${newReview.id} | Semana ${getWeekNumber(new Date())}` })
         .setTimestamp();
     
     const logChannel = client.channels.cache.get(REVIEWS_LOG_CHANNEL_ID);
