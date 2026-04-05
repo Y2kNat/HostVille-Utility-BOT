@@ -1,35 +1,29 @@
-
 {
-  "name": "discord-review-bot",
-  "version": "3.0.0",
-  "description": "Bot profissional de avaliação para equipes Discord com sistema de ranking semanal",
+  "name": "discord-avaliacao-bot",
+  "version": "1.0.0",
+  "description": "Bot de avaliação de equipe para Discord com sistema completo de ranking, logs e moderação",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "backup": "node index.js --backup",
-    "test": "node test.js"
-  },
-  "dependencies": {
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1",
-    "node-cron": "^3.0.3"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "dev": "node --watch index.js"
   },
   "keywords": [
     "discord",
     "bot",
-    "review",
-    "rating",
-    "staff",
+    "discord.js",
     "moderation",
+    "reviews",
     "ranking"
   ],
-  "author": "Discord Bot Developer",
+  "author": "SeuNome",
   "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  },
   "engines": {
-    "node": ">=16.9.0"
+    "node": ">=18.0.0"
   }
 }
