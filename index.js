@@ -497,9 +497,7 @@ client.once('clientReady', async () => {
 
 function updateStatus() {
     const activities = [
-        { name: `${STAFF_ROLE_IDS.length} cargos da staff`, type: 3 },
-        { name: '/clearall | /clear', type: 2 },
-        { name: 'Sistema de Avaliação', type: 3 },
+         { name: '𝙼𝚊𝚍𝚎 𝚋𝚢 𝚈𝟸𝚔_𝙽𝚊𝚝', type: 2 },
         { name: 'Avalie sua equipe!', type: 2 }
     ];
     
@@ -511,7 +509,7 @@ function updateStatus() {
             status: 'online'
         });
         index++;
-    }, 15000);
+    }, 10000);
 }
 
 // ============================================
