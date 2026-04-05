@@ -1,8 +1,7 @@
 // ============================================
 // index.js - Bot Discord com Sistema de Avaliação
 // ============================================
-// Versão: 5.0.0
-// Total de linhas: ~2300
+// Versão: 6.0.0 - COM DEBUG COMPLETO
 // ============================================
 
 require('dotenv').config();
@@ -55,22 +54,6 @@ const STAFF_ROLE_IDS = process.env.STAFF_ROLE_IDS ? process.env.STAFF_ROLE_IDS.s
 const REVIEWS_CHANNEL_ID = process.env.REVIEWS_CHANNEL_ID;
 const REVIEWS_LOG_CHANNEL_ID = process.env.REVIEWS_LOG_CHANNEL_ID;
 const LOG_CHANNEL_ID = process.env.LOG_CHANNEL_ID;
-
-// Validação das variáveis
-if (!TOKEN) {
-    console.error('❌ TOKEN não configurado no arquivo .env');
-    process.exit(1);
-}
-if (!GUILD_ID) {
-    console.error('❌ GUILD_ID não configurado no arquivo .env');
-    process.exit(1);
-}
-if (STAFF_ROLE_IDS.length === 0) {
-    console.warn('⚠️ Nenhum cargo staff configurado');
-}
-if (!REVIEWS_CHANNEL_ID) {
-    console.warn('⚠️ REVIEWS_CHANNEL_ID não configurado');
-}
 
 // Constantes
 const PREFIX = '!';
@@ -146,32 +129,32 @@ function addLog(entry) {
 // FUNÇÕES DE UTILIDADE
 // ============================================
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Verificar se usuário é staff
 function isStaff(member) {
     if (!member || !member.roles) return false;
     return STAFF_ROLE_IDS.some(roleId => member.roles.cache.has(roleId));
 }
 
-// Verificar se usuário NÃO é staff (pode avaliar)
 function canReview(member) {
     return !isStaff(member);
 }
 
-// Obter cor baseada na nota
 function getColorByScore(score) {
     if (score >= 0 && score <= 3) return 0xFF0000;
     if (score >= 4 && score <= 6) return 0xFFFF00;
     return 0x00FF00;
 }
 
-// Obter emoji baseado na nota
 function getScoreEmoji(score) {
     if (score >= 0 && score <= 3) return '🔴';
     if (score >= 4 && score <= 6) return '🟡';
     return '🟢';
 }
 
-// Obter descrição da nota
 function getScoreDescription(score) {
     if (score === 0) return 'Precisa melhorar drasticamente';
     if (score === 1) return 'Muito insatisfatório';
@@ -187,7 +170,6 @@ function getScoreDescription(score) {
     return 'Nota inválida';
 }
 
-// Formatar data
 function formatDate(date, format = 'full') {
     const d = new Date(date);
     const formats = {
@@ -199,7 +181,6 @@ function formatDate(date, format = 'full') {
     return formats[format] || formats.full;
 }
 
-// Obter número da semana
 function getWeekNumber(date) {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -208,64 +189,116 @@ function getWeekNumber(date) {
     return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 }
 
-// Delay helper para evitar rate limit
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+// ============================================
+// FUNÇÃO DE BUSCA DE MEMBROS STAFF COM DEBUG
+// ============================================
 
-// Buscar membros staff com retry e rate limit handling
 async function fetchStaffMembers(guild) {
-    let retries = 3;
-    let delayMs = 1000;
+    console.log('\n🔍 ========== INICIANDO BUSCA DE MEMBROS STAFF ==========');
+    console.log(`📋 GUILD_ID: ${guild.id}`);
+    console.log(`📋 Nome do servidor: ${guild.name}`);
+    console.log(`📋 Cargos staff configurados: ${STAFF_ROLE_IDS.length}`);
+    console.log(`📋 IDs dos cargos: ${STAFF_ROLE_IDS.join(', ')}`);
     
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            // Garantir que o cache está atualizado
-            await guild.members.fetch({ 
-                limit: 1000,
-                force: true 
-            });
-            
-            const staffMembers = [];
-            
-            for (const roleId of STAFF_ROLE_IDS) {
-                const role = guild.roles.cache.get(roleId);
-                if (role) {
-                    console.log(`🔍 Cargo encontrado: ${role.name} (${role.id}) - ${role.members.size} membros`);
-                    
-                    for (const [id, m] of role.members) {
-                        if (!staffMembers.find(sm => sm.id === id)) {
-                            staffMembers.push({
-                                id: m.id,
-                                name: m.user.tag,
-                                displayName: m.displayName,
-                                roleName: role.name,
-                                roleId: role.id
-                            });
-                        }
-                    }
-                } else {
-                    console.warn(`⚠️ Cargo não encontrado: ${roleId}`);
+    const staffMembers = [];
+    
+    // Primeiro, listar todos os cargos do servidor para debug
+    console.log('\n📌 Todos os cargos do servidor:');
+    guild.roles.cache.forEach(role => {
+        console.log(`   - ${role.name} (${role.id}) - ${role.members.size} membros`);
+    });
+    
+    // Para cada cargo staff configurado
+    for (const roleId of STAFF_ROLE_IDS) {
+        console.log(`\n🔎 Procurando cargo com ID: ${roleId}`);
+        
+        const role = guild.roles.cache.get(roleId);
+        
+        if (!role) {
+            console.log(`   ❌ CARGO NÃO ENCONTRADO! Verifique se o ID está correto.`);
+            continue;
+        }
+        
+        console.log(`   ✅ Cargo encontrado: ${role.name}`);
+        console.log(`   👥 Membros no cargo: ${role.members.size}`);
+        
+        // Listar membros do cargo
+        if (role.members.size === 0) {
+            console.log(`   ⚠️ O cargo ${role.name} não tem nenhum membro!`);
+        } else {
+            console.log(`   📝 Membros do cargo ${role.name}:`);
+            for (const [id, m] of role.members) {
+                console.log(`      - ${m.user.tag} (${id})`);
+                if (!staffMembers.find(sm => sm.id === id)) {
+                    staffMembers.push({
+                        id: m.id,
+                        name: m.user.tag,
+                        displayName: m.displayName,
+                        roleName: role.name,
+                        roleId: role.id
+                    });
                 }
-            }
-            
-            return staffMembers;
-        } catch (error) {
-            if (error.code === 429 || error.message?.includes('rate limit')) {
-                console.log(`⏳ Rate limit atingido, tentativa ${attempt}/${retries}, aguardando ${delayMs}ms...`);
-                await delay(delayMs);
-                delayMs *= 2; // Exponential backoff
-            } else {
-                console.error(`❌ Erro ao buscar membros:`, error.message);
-                throw error;
             }
         }
     }
     
-    return [];
+    console.log(`\n📊 TOTAL DE MEMBROS STAFF ENCONTRADOS: ${staffMembers.length}`);
+    console.log('🔍 ========== FIM DA BUSCA ==========\n');
+    
+    return staffMembers;
 }
 
-// Calcular estatísticas do usuário
+// ============================================
+// FUNÇÃO ALTERNATIVA: BUSCAR POR MEMBROS QUE TÊM O CARGO
+// ============================================
+
+async function fetchStaffMembersAlternative(guild) {
+    console.log('\n🔍 [ALTERNATIVA] Buscando membros staff de forma diferente...');
+    
+    const staffMembers = [];
+    
+    // Método 2: Buscar todos os membros e verificar se têm os cargos
+    try {
+        // Buscar todos os membros do servidor
+        const allMembers = await guild.members.fetch({ limit: 1000, force: true });
+        console.log(`📊 Total de membros no servidor: ${allMembers.size}`);
+        
+        for (const [id, member] of allMembers) {
+            // Verificar se o membro tem algum dos cargos staff
+            const hasStaffRole = STAFF_ROLE_IDS.some(roleId => member.roles.cache.has(roleId));
+            
+            if (hasStaffRole) {
+                // Descobrir qual cargo staff ele tem (para mostrar)
+                let roleName = 'Staff';
+                for (const roleId of STAFF_ROLE_IDS) {
+                    if (member.roles.cache.has(roleId)) {
+                        const role = guild.roles.cache.get(roleId);
+                        if (role) roleName = role.name;
+                        break;
+                    }
+                }
+                
+                staffMembers.push({
+                    id: member.id,
+                    name: member.user.tag,
+                    displayName: member.displayName,
+                    roleName: roleName,
+                    roleId: member.roles.cache.find(r => STAFF_ROLE_IDS.includes(r.id))?.id || 'unknown'
+                });
+            }
+        }
+    } catch (error) {
+        console.error(`❌ Erro na busca alternativa: ${error.message}`);
+    }
+    
+    console.log(`📊 [ALTERNATIVA] Membros staff encontrados: ${staffMembers.length}`);
+    return staffMembers;
+}
+
+// ============================================
+// CALCULAR ESTATÍSTICAS
+// ============================================
+
 function calculateUserStats(userId) {
     const reviews = loadReviews();
     const userReviews = reviews.filter(r => r.reviewedId === userId);
@@ -286,7 +319,6 @@ function calculateUserStats(userId) {
     };
 }
 
-// Criar backup
 function createBackup() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupData = {
@@ -299,7 +331,6 @@ function createBackup() {
     const backupFile = path.join(BACKUP_DIR, `backup_${timestamp}.json`);
     fs.writeFileSync(backupFile, JSON.stringify(backupData, null, 2));
     
-    // Limpar backups antigos (manter últimos 10)
     const backups = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith('.json')).sort();
     while (backups.length > 10) {
         const oldBackup = backups.shift();
@@ -357,7 +388,6 @@ async function generateWeeklyRanking() {
     rankings.sort((a, b) => b.averageScore - a.averageScore);
     const top3 = rankings.slice(0, 3);
     
-    // Salvar ranking
     const rankingsData = loadRankings();
     rankingsData.push({
         weekNumber,
@@ -481,13 +511,28 @@ async function setupReviewsChannel() {
         return;
     }
     
-    console.log(`📡 Conectado à guild: ${guild.name} (${guild.id})`);
+    console.log(`\n📡 Conectado à guild: ${guild.name} (${guild.id})`);
     
-    // Buscar membros staff com tratamento de rate limit
-    const staffMembers = await fetchStaffMembers(guild);
+    // Tentar método 1 primeiro
+    let staffMembers = await fetchStaffMembers(guild);
     
-    console.log(`👥 Total de membros staff encontrados: ${staffMembers.length}`);
-    console.log(`📋 Cargos configurados: ${STAFF_ROLE_IDS.length}`);
+    // Se método 1 falhar, tentar método alternativo
+    if (staffMembers.length === 0) {
+        console.log('⚠️ Nenhum membro encontrado no método 1, tentando método alternativo...');
+        staffMembers = await fetchStaffMembersAlternative(guild);
+    }
+    
+    // Se ainda não tem membros, tentar mais uma vez com delay
+    if (staffMembers.length === 0) {
+        console.log('⏳ Aguardando 5 segundos e tentando novamente...');
+        await delay(5000);
+        await guild.members.fetch({ force: true });
+        staffMembers = await fetchStaffMembers(guild);
+        
+        if (staffMembers.length === 0) {
+            staffMembers = await fetchStaffMembersAlternative(guild);
+        }
+    }
     
     const embed = new EmbedBuilder()
         .setTitle('📊 Sistema de Avaliação da Equipe')
@@ -512,7 +557,6 @@ async function setupReviewsChannel() {
     
     const row = new ActionRowBuilder().addComponents(button);
     
-    // Limpar mensagens antigas do bot
     try {
         const messages = await channel.messages.fetch({ limit: 50 });
         const botMessages = messages.filter(m => m.author.id === client.user.id);
@@ -535,23 +579,25 @@ client.once('clientReady', async () => {
     console.log('='.repeat(60));
     console.log(`🤖 Bot logado como ${client.user.tag}`);
     console.log(`📡 ID: ${client.user.id}`);
-    console.log(`🎯 Guild ID configurada: ${GUILD_ID}`);
+    console.log(`🎯 GUILD_ID configurada: ${GUILD_ID}`);
     console.log(`📋 Cargos Staff configurados: ${STAFF_ROLE_IDS.length}`);
-    console.log(`📺 Canal de Avaliações: ${REVIEWS_CHANNEL_ID}`);
-    console.log(`📝 Canal de Logs Avaliações: ${REVIEWS_LOG_CHANNEL_ID}`);
-    console.log(`📊 Canal de Logs Gerais: ${LOG_CHANNEL_ID}`);
     console.log('='.repeat(60));
     
     // Verificar se a guild existe
     const guild = client.guilds.cache.get(GUILD_ID);
     if (!guild) {
-        console.error(`❌ Guild com ID ${GUILD_ID} não encontrada! Verifique se o bot está no servidor.`);
+        console.error(`\n❌ ERRO CRÍTICO: Guild com ID ${GUILD_ID} não encontrada!`);
+        console.error(`📌 Verifique se o bot está no servidor correto.`);
+        console.error(`📌 O bot está nos seguintes servidores:`);
+        client.guilds.cache.forEach(g => {
+            console.error(`   - ${g.name} (${g.id})`);
+        });
         return;
     }
     
     console.log(`✅ Conectado ao servidor: ${guild.name}`);
     
-    // Registrar comandos slash na guild específica (mais rápido)
+    // Registrar comandos slash na guild específica
     try {
         const rest = new REST({ version: '10' }).setToken(TOKEN);
         await rest.put(
@@ -563,17 +609,17 @@ client.once('clientReady', async () => {
         console.error('❌ Erro ao registrar comandos:', error);
     }
     
-    // Aguardar um pouco e configurar canal
+    // Aguardar e configurar canal
     setTimeout(async () => {
         await setupReviewsChannel();
     }, 5000);
     
-    // Sistema de ranking semanal (verificar a cada hora)
+    // Sistema de ranking semanal
     setInterval(() => {
         checkAndSendRanking();
     }, 60 * 60 * 1000);
     
-    // Backup diário às 03:00
+    // Backup diário
     setInterval(() => {
         const now = new Date();
         if (now.getHours() === 3 && now.getMinutes() === 0) {
@@ -581,7 +627,6 @@ client.once('clientReady', async () => {
         }
     }, 60 * 1000);
     
-    // Criar backup inicial
     setTimeout(() => {
         createBackup();
     }, 10000);
@@ -590,7 +635,6 @@ client.once('clientReady', async () => {
     updateStatus();
 });
 
-// Atualizar status do bot
 function updateStatus() {
     const activities = [
         { name: `${STAFF_ROLE_IDS.length} cargos da staff`, type: 3 },
@@ -619,7 +663,6 @@ client.on('interactionCreate', async interaction => {
     
     const { commandName, member, options } = interaction;
     
-    // Verificar permissão para comandos de moderação
     if (commandName === 'clearall' || commandName === 'clear') {
         if (!isStaff(member)) {
             return interaction.reply({
@@ -629,7 +672,6 @@ client.on('interactionCreate', async interaction => {
         }
     }
     
-    // Comando /clearall
     if (commandName === 'clearall') {
         const channel = options.getChannel('channel');
         const limit = options.getInteger('limit') || 100;
@@ -658,7 +700,6 @@ client.on('interactionCreate', async interaction => {
                 const deleted = await channel.bulkDelete(fetched, true);
                 deletedCount += deleted.size;
                 remaining -= deleted.size;
-                
                 await delay(500);
             }
             
@@ -675,12 +716,11 @@ client.on('interactionCreate', async interaction => {
             
         } catch (error) {
             await interaction.editReply({
-                content: '❌ Erro ao apagar mensagens! Mensagens podem ser muito antigas (mais de 14 dias).'
+                content: '❌ Erro ao apagar mensagens!'
             });
         }
     }
     
-    // Comando /clear
     if (commandName === 'clear') {
         const targetUser = options.getUser('user');
         const limit = options.getInteger('limit') || 100;
@@ -705,7 +745,6 @@ client.on('interactionCreate', async interaction => {
                 await channel.bulkDelete(messagesToDelete, true);
                 deletedCount += messagesToDelete.size;
                 remaining -= messagesToDelete.size;
-                
                 await delay(500);
             }
             
@@ -722,12 +761,11 @@ client.on('interactionCreate', async interaction => {
             
         } catch (error) {
             await interaction.editReply({
-                content: '❌ Erro ao apagar mensagens! Mensagens podem ser muito antigas (mais de 14 dias).'
+                content: '❌ Erro ao apagar mensagens!'
             });
         }
     }
     
-    // Comando /stats
     if (commandName === 'stats') {
         const targetUser = options.getUser('user') || interaction.user;
         const stats = calculateUserStats(targetUser.id);
@@ -754,7 +792,6 @@ client.on('interactionCreate', async interaction => {
         await interaction.reply({ embeds: [embed] });
     }
     
-    // Comando /ranking
     if (commandName === 'ranking') {
         const top3 = await generateWeeklyRanking();
         
@@ -783,7 +820,6 @@ client.on('interactionCreate', async interaction => {
         await interaction.reply({ embeds: [embed] });
     }
     
-    // Comando /botinfo
     if (commandName === 'botinfo') {
         const reviews = loadReviews();
         const stats = loadStats();
@@ -833,16 +869,19 @@ client.on('interactionCreate', async interaction => {
     
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     
-    // Buscar membros staff com tratamento de rate limit
-    const staffMembers = await fetchStaffMembers(guild);
+    // Tentar buscar membros staff
+    let staffMembers = await fetchStaffMembers(guild);
     
     if (staffMembers.length === 0) {
-        return interaction.editReply({
-            content: '❌ Nenhum membro da staff disponível para avaliação no momento!\n\nVerifique se:\n1. Os IDs dos cargos estão corretos\n2. Os cargos têm membros\n3. O bot tem permissão para ver os membros'
-        });
+        staffMembers = await fetchStaffMembersAlternative(guild);
     }
     
-    // Criar menu de seleção de usuários
+    if (staffMembers.length === 0) {
+        const errorMessage = `❌ Nenhum membro da staff encontrado!\n\n📋 **Cargos configurados:** ${STAFF_ROLE_IDS.join(', ')}\n\n🔍 **Verifique:**\n1. Os IDs dos cargos estão corretos?\n2. Os cargos têm membros?\n3. O bot tem permissão "Membros do Servidor"?\n4. O bot está no servidor correto?`;
+        
+        return interaction.editReply({ content: errorMessage });
+    }
+    
     const options = staffMembers.map(m => ({
         label: m.name.length > 25 ? m.name.substring(0, 22) + '...' : m.name,
         value: m.id,
@@ -858,7 +897,7 @@ client.on('interactionCreate', async interaction => {
     const row = new ActionRowBuilder().addComponents(selectMenu);
     
     await interaction.editReply({
-        content: `**📋 Selecione o membro da staff que deseja avaliar:**\n\nTotal de membros disponíveis: ${staffMembers.length}`,
+        content: `**📋 Selecione o membro da staff que deseja avaliar:**\n\n👥 Total de membros disponíveis: ${staffMembers.length}`,
         components: [row]
     });
 });
@@ -898,7 +937,6 @@ client.on('interactionCreate', async interaction => {
         });
     }
     
-    // Verificar limite de avaliações por dia
     const reviews = loadReviews();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -914,7 +952,6 @@ client.on('interactionCreate', async interaction => {
         });
     }
     
-    // Criar modal
     const modal = new ModalBuilder()
         .setCustomId(`review_modal_${selectedUserId}`)
         .setTitle(`Avaliar ${targetMember.user.displayName}`);
@@ -997,7 +1034,6 @@ client.on('interactionCreate', async interaction => {
         });
     }
     
-    // Salvar avaliação
     const reviews = loadReviews();
     const newReview = {
         id: Date.now().toString(),
@@ -1017,7 +1053,6 @@ client.on('interactionCreate', async interaction => {
     reviews.push(newReview);
     saveReviews(reviews);
     
-    // Atualizar estatísticas
     const stats = loadStats();
     stats.reviews = reviews.length;
     if (!stats.users[reviewed.id]) {
@@ -1027,7 +1062,6 @@ client.on('interactionCreate', async interaction => {
     stats.users[reviewed.id].totalScore += score;
     saveStats(stats);
     
-    // Embed para o canal de logs
     const color = getColorByScore(score);
     const scoreEmoji = getScoreEmoji(score);
     const scoreDesc = getScoreDescription(score);
@@ -1048,10 +1082,8 @@ client.on('interactionCreate', async interaction => {
         await logChannel.send({ embeds: [logEmbed] });
     }
     
-    // Limpar dados temporários
     client.tempReviewData.delete(interaction.user.id);
     
-    // Resposta de sucesso
     const successEmbed = new EmbedBuilder()
         .setTitle('✅ Avaliação Enviada!')
         .setDescription(`Sua avaliação para **${reviewed.user.displayName}** foi registrada com sucesso!`)
@@ -1072,7 +1104,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 // ============================================
-// HANDLER: MENSAGENS DE TEXTO
+// MENSAGENS DE TEXTO
 // ============================================
 
 client.on('messageCreate', async message => {
@@ -1206,7 +1238,6 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000);
 
-// Limpeza de dados antigos (a cada 24 horas)
 setInterval(() => {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -1238,10 +1269,10 @@ process.on('uncaughtException', (error) => {
 // ============================================
 
 console.log('='.repeat(60));
-console.log('🚀 INICIANDO BOT DE AVALIAÇÃO v5.0');
+console.log('🚀 INICIANDO BOT DE AVALIAÇÃO v6.0 - DEBUG');
 console.log('='.repeat(60));
-console.log(`🎯 GUILD_ID: ${GUILD_ID}`);
-console.log(`🔧 Cargos Staff: ${STAFF_ROLE_IDS.length > 0 ? STAFF_ROLE_IDS.join(', ') : 'NENHUM CONFIGURADO'}`);
+console.log(`🎯 GUILD_ID: ${GUILD_ID || 'NÃO CONFIGURADO'}`);
+console.log(`🔧 Cargos Staff: ${STAFF_ROLE_IDS.length > 0 ? STAFF_ROLE_IDS.join(', ') : 'NENHUM'}`);
 console.log(`📺 REVIEWS_CHANNEL_ID: ${REVIEWS_CHANNEL_ID || 'NÃO CONFIGURADO'}`);
 console.log(`📝 REVIEWS_LOG_CHANNEL_ID: ${REVIEWS_LOG_CHANNEL_ID || 'NÃO CONFIGURADO'}`);
 console.log(`📊 LOG_CHANNEL_ID: ${LOG_CHANNEL_ID || 'NÃO CONFIGURADO'}`);
