@@ -1,20 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-// ============================================
-// index.js - Bot Discord com Sistema de Avaliação
-// ============================================
-// Versão: 9.0.0 - COM CACHE E ANTI-RATE-LIMIT
-// ============================================
-
 require('dotenv').config();
 const { 
     Client, 
