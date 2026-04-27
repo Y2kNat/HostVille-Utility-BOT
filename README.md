@@ -1,5 +1,3 @@
----
-
 <p align="center">
   <img src="https://cdn.discordapp.com/attachments/1481730240236752906/1490186146557202542/2caafef3b98fb7ca780403088149bce9.png?ex=69d3237f&is=69d1d1ff&hm=325cab5741420b06e38c8860feac3aa9699d1a89271f44e94d68998535a63f5a&" width="100%">
 </p>
@@ -14,7 +12,7 @@
 
 <br>
 
-<h1 align="center">𝙷𝚘𝚜𝚝𝚅𝚒𝚕𝚕𝚎 𝚁𝚎𝚟𝚒𝚎𝚠 • 𝙱𝙾𝚃</h1>
+<h1 align="center">⭐ 𝙷𝚘𝚜𝚝𝚅𝚒𝚕𝚕𝚎 𝚁𝚎𝚟𝚒𝚎𝚠 • 𝙱𝙾𝚃</h1>
 
 <p align="center">
   Sistema avançado de avaliação de staff com ranking semanal, cache inteligente e proteção anti rate-limit.
@@ -36,8 +34,6 @@ Ele permite que usuários avaliem a equipe com notas e comentários, gerando mé
 
 ## ✦ 𝙵𝙴𝙰𝚃𝚄𝚁𝙴𝚂
 
-<p align="center"><b>⚡ Sistema completo de avaliação ⚡</b></p>
-
 ```txt
 ⭐ REVIEW SYSTEM    → Avaliação de 0 a 10
 📊 STATS SYSTEM     → Estatísticas detalhadas
@@ -47,12 +43,13 @@ Ele permite que usuários avaliem a equipe com notas e comentários, gerando mé
 📩 LOG SYSTEM       → Logs completos de avaliações
 💾 DATABASE         → JSON persistente
 🧠 ANTI SPAM        → Limite diário de avaliações
-
+```
 
 ---
 
-✦ 𝙎𝙔𝙎𝙏𝙀𝙈 𝙁𝙇𝙊𝙒
+✦ 𝙎𝚈𝚂𝚃𝙴𝙼 𝙵𝙻𝙾𝚆
 
+```
 Usuário clica em "Avaliar"
         ↓
 Seleciona membro da staff
@@ -68,25 +65,26 @@ Atualiza estatísticas
 Envia log automático
         ↓
 Atualiza ranking semanal
-
+```
 
 ---
 
 ✦ 𝙍𝘼𝙉𝙆𝙄𝙉𝙂 𝙎𝙀𝙈𝘼𝙉𝘼𝙇
 
-╭────────────────────────╮ │ 🥇 Top 1 → Melhor média │ │ 🥈 Top 2 → Segundo lugar │ │ 🥉 Top 3 → Terceiro     │ ╰────────────────────────╯
-
+```
+╭────────────────────────╮
+│ 🥇 Top 1 → Melhor média │
+│ 🥈 Top 2 → Segundo lugar │
+│ 🥉 Top 3 → Terceiro     │
+╰────────────────────────╯
 ✔ Atualizado automaticamente
 ✔ Baseado nas avaliações da semana
 ✔ Enviado no canal de logs
-
+```
 
 ---
 
 ✦ 𝘾𝙊𝙈𝙈𝘼𝙉𝘿𝙎
-
-
----
 
 /stats
 
@@ -96,18 +94,12 @@ Atualiza ranking semanal
 • Melhor / pior nota
 • Últimas avaliações
 
-
----
-
 /ranking
 
 🏆 Ranking semanal
 • Top 3 staff
 • Média de avaliações
 • Total de reviews
-
-
----
 
 /clear
 
@@ -116,16 +108,12 @@ Atualiza ranking semanal
 • Limite configurável
 • Log automático
 
-
----
-
 /clearall
 
 🧹 Limpa canal completo
 • Apenas staff
 • Até 500 mensagens
 • Ignora fixadas
-
 
 ---
 
@@ -138,7 +126,6 @@ Atualiza ranking semanal
 👤 USUÁRIOS
 ✔ Podem avaliar staff
 ✔ Limite de 10 avaliações por dia
-
 
 ---
 
@@ -155,7 +142,6 @@ Atualiza ranking semanal
 ✔ Persistente
 ✔ Fácil manutenção
 
-
 ---
 
 ✦ 𝘼𝙉𝙏𝙄 𝙍𝘼𝙏𝙀 𝙇𝙄𝙈𝙄𝙏
@@ -164,7 +150,6 @@ Atualiza ranking semanal
 ⏱ Delay entre requisições
 🔄 Atualização automática
 ⚡ Redução de chamadas API
-
 
 ---
 
@@ -176,7 +161,6 @@ Atualiza ranking semanal
 ✔ Criar competitividade saudável
 ✔ Evitar abuso de API
 
-
 ---
 
 📌 Status
@@ -185,4 +169,3 @@ Atualiza ranking semanal
 
 𝙼𝚊𝚍𝚎 𝙱𝚢 𝚈𝟸𝚔_𝙽𝚊𝚝
 
----
