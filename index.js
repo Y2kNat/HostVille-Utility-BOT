@@ -1029,5 +1029,3 @@ client.login(TOKEN).catch(error => {
 });
 
 module.exports = { client, isStaff, canReview, getColorByScore, getScoreEmoji };
-
-
