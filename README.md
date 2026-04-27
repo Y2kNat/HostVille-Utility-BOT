@@ -1,3 +1,4 @@
+
 <p align="center">
   <img src="https://www.image2url.com/r2/default/images/1777332207044-62c22e8f-5ca3-4415-8445-b1aed5c90971.png" width="100%">
 </p>
@@ -174,5 +175,3 @@ sequenceDiagram
 🟢 Online • ⚡ Estável • 🔒 Seguro
 
 𝙼𝚊𝚍𝚎 𝙱𝚢 𝚈𝟸𝚔_𝙽𝚊𝚝
-
-```
