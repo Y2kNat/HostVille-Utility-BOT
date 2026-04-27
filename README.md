@@ -47,24 +47,30 @@ Ele permite que usuários avaliem a equipe com notas e comentários, gerando mé
 
 ---
 
-✦ 𝙎𝚈𝚂𝚃𝙴𝙼 𝙵𝙻𝙾𝚆
+✦ 𝚂𝚈𝚂𝚃𝙴𝙼 𝙵𝙻𝙾𝚆
 
-```
-Usuário clica em "Avaliar"
-        ↓
-Seleciona membro da staff
-        ↓
-Escolhe nota (0-10)
-        ↓
-Escreve feedback
-        ↓
-Sistema salva no JSON
-        ↓
-Atualiza estatísticas
-        ↓
-Envia log automático
-        ↓
-Atualiza ranking semanal
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant B as Bot
+    participant DB as JSON Storage
+    participant Log as Canal de Logs
+
+    U->>B: Clica "Avaliar equipe"
+    B->>U: Menu dropdown (staff disponível)
+    U->>B: Seleciona membro da staff
+    B->>U: Modal (Nota 0-10 + Feedback)
+    U->>B: Envia avaliação
+    B->>B: Valida nota (0-10)
+    alt Nota inválida ou limite diário
+        B-->>U: Erro ephemeral
+    else Avaliação válida
+        B->>DB: Salva nova review (reviews.json)
+        B->>DB: Atualiza stats.json
+        B->>Log: Log detalhado da avaliação
+        B->>B: Recalcula ranking semanal
+        B-->>U: Confirmação ephemeral
+    end
 ```
 
 ---
@@ -169,3 +175,4 @@ Atualiza ranking semanal
 
 𝙼𝚊𝚍𝚎 𝙱𝚢 𝚈𝟸𝚔_𝙽𝚊𝚝
 
+```
