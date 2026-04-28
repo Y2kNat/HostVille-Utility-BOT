@@ -13,7 +13,7 @@
 
 <br>
 
-<h1 align="center">⭐ 𝙷𝚘𝚜𝚝𝚅𝚒𝚕𝚕𝚎 𝚁𝚎𝚟𝚒𝚎𝚠 • 𝙱𝙾𝚃</h1>
+<h1 align="center"> 𝙷𝚘𝚜𝚝𝚅𝚒𝚕𝚕𝚎 𝚁𝚎𝚟𝚒𝚎𝚠 • 𝙱𝙾𝚃</h1>
 
 <p align="center">
   Sistema avançado de avaliação de staff com ranking semanal, cache inteligente e proteção anti rate-limit.
